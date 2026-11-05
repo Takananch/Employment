@@ -1,0 +1,81 @@
+#pragma once
+#include "DxLib.h"
+
+class CollisionAABB;
+class CollisionSphere;
+
+// アニメーション
+enum PlayerAnimationType
+{
+	PLAYER_ANIMATION_DASH,
+	PLAYER_ANIMATION_MINE,
+	PLAYER_ANIMATION_WAIT,
+	PLAYER_ANIMATION_WALK,
+};
+
+class Player
+{
+public:
+
+	Player();
+	~Player();
+
+public:
+
+	void Init();
+	void Load();
+	void Start();
+	void Step();
+	void Update();
+	void Draw();
+	void Fin();
+
+public:
+
+	VECTOR GetPos() { return m_Pos; }
+	CollisionAABB* GetAABB() { return m_AABB; }
+	CollisionSphere* GetSphereCollision() { return m_SphereCollision; }
+
+	void PlayAnimation(PlayerAnimationType anim, bool isLoop);
+	void UpdateAnimation();
+
+	void HitBlock(CollisionAABB* other);	// ブロックとの当たり判定
+
+	VECTOR GetPos() const	// 座標を取得
+	{
+		return m_Pos;
+	}
+
+	void SetPos(VECTOR pos)	// 座標を設定
+	{
+		m_Pos = pos;
+	}
+
+	CollisionSphere* GetSphere()	// 球の当たり判定を取得
+	{
+		return m_SphereCollision;
+	}
+
+private:
+
+	int m_ModelHandle;					// モデルハンドル
+	VECTOR m_Pos;						// 座標
+	float m_MoveSpeed;					// 移動速度
+	float m_MoveDashSpeed;				// ダッシュ速度
+	float m_Stamina;					// スタミナ
+	float m_MaxStamina;					// 最大スタミナ
+	float m_StaminaRecoveryDelay;		// スタミナ回復開始までの時間
+	float m_StaminaEmptyDelay;			// スタミナ0になった後の待ち時間
+	bool m_IsDashing;					// 現在ダッシュ中か
+	int m_AnimationAttachIndex;			// アニメーションのアタッチインデックス
+	float m_AnimationTotalTime;			// 再生中のアニメーションの総時間
+	float m_AnimationNowTime;			// 再生中のアニメーションの再生時間
+	bool m_IsLoopAnimation;				// アニメーションをループさせるか
+	PlayerAnimationType m_NowAnimation;	// 再生中のアニメーション
+	VECTOR m_Rot;						// 回転
+	VECTOR m_Scale;						// スケール
+	VECTOR m_Move;						// 移動量
+	VECTOR m_OldPos;					// 前回の座標
+	CollisionAABB* m_AABB;				// AABBの当たり判定
+	CollisionSphere* m_SphereCollision;	// 球の当たり判定
+};

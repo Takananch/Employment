@@ -1,0 +1,34 @@
+#pragma once
+#include <vector>
+
+class CollisionAABB;
+class CollisionSphere;
+
+class CollisionManager
+{
+public:
+	CollisionManager();
+	~CollisionManager();
+
+	// マネージャーインスタンス管理
+	static void CreateInstance() { if (!m_Instance) m_Instance = new CollisionManager; }
+	// マネージャーの関数が呼びたいときに使用する、マネージャー取得関数
+	static CollisionManager* GetInstance() { return m_Instance; }
+	// 使わなくなったら削除する際の削除関数
+	static void DeleteInstance() { if (m_Instance) delete m_Instance; m_Instance = nullptr; }
+
+	void Draw();	// 描画
+	void Fin();		// 終了
+
+	// AABBを生成する
+	CollisionAABB* CreateAABB();
+	// Sphereを生成する
+	CollisionSphere* CreateSphere();
+
+private:
+	// CollisionManagerインスタンス
+	static CollisionManager* m_Instance;
+	// 当たり判定管理用配列
+	std::vector<CollisionAABB*> m_AABB;
+	std::vector<CollisionSphere*> m_Sphere;
+};
