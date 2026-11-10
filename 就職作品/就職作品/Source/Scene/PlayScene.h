@@ -3,6 +3,7 @@
 
 //class BackGround;
 class Minecart;
+class Money;
 
 class PlayScene : public SceneBase
 {

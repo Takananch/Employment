@@ -2,9 +2,9 @@
 #include "Input.h"
 
 // 入力ビットフラグ
-int g_InputState;
+int g_InputState = 0;
 // 前回の入力ビット
-int g_PrevInputState;
+int g_PrevInputState = 0;
 
 // マウスの移動量
 int g_MouseMoveX;
@@ -38,7 +38,7 @@ namespace Input
 		g_InputState = 0;
 
 		// 前回の入力を覚えておく
-		// g_PrevInputState = g_InputState;
+		g_PrevInputState = g_InputState;
 
 		// 入力状態をクリア
 		g_InputState = 0;

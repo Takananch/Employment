@@ -135,8 +135,8 @@ void PlayScene::Draw()
 {
 	m_Minecart->Draw();
 	StageManager::GetInstance()->Draw();
-	StoneManager::GetInstance()->Draw();
 	PlayerManager::GetInstance()->Draw();
+	StoneManager::GetInstance()->Draw();
 	CameraManager::GetInstance()->Draw();
 
 	// UI‚Ì•`‰æ
@@ -145,7 +145,7 @@ void PlayScene::Draw()
 	DrawGraph(0, 0, g_UI_OperationHandle, TRUE);
 
 	// —ÝŒv‹àŠz‚Æ–Ú•W‹àŠz‚ð•`‰æ
-	DrawFormatString(350, 55, GetColor(0, 0, 0),"%d/300", m_Money->GetTotalMoney());
+	DrawFormatString(300, 55, GetColor(0, 0, 0),"%d/300", m_Money->GetTotalMoney());
 
 	// EƒL[‰æ‘œ‚Ì•`‰æ
 	if (StoneManager::GetInstance()->IsInteractable())
