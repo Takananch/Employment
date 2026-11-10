@@ -38,9 +38,10 @@ Player::Player()
     m_Scale = VGet(0.0f, 0.0f, 0.0f);
     m_Move = VGet(0.0, 0.0f, 0.0f);
     m_OldPos = VGet(0.0, 0.0f, 0.0f);
-    m_IsDashing = false;
+    m_IsDash = false;
 	m_AABB = nullptr;
     m_SphereCollision = nullptr;
+    m_Gems.clear();
 }
 
 Player::~Player()
@@ -122,7 +123,7 @@ void Player::Step()
     }
 
 	// ダッシュ中かどうかのフラグをリセット
-    m_IsDashing = false;
+    m_IsDash = false;
 
 	// 移動量が0でない場合、正規化して移動速度を掛ける
     if (VSize(move) > 0.0f)
@@ -134,7 +135,7 @@ void Player::Step()
         if (Input::IsInputKey(Input::KEY_LSHIFT) && m_Stamina > 0.0f && m_StaminaEmptyDelay <= 0.0f)
         {
 			currentMoveSpeed = m_MoveDashSpeed; // ダッシュ中の速度に変更
-			m_IsDashing = true;                 // ダッシュ中のフラグを立てる
+			m_IsDash = true;                 // ダッシュ中のフラグを立てる
 			m_Stamina -= PLAYER_STAMINA_DRAIN;  // スタミナを消費
 
 			// スタミナが0以下になった場合、スタミナを0にし、スタミナ0になった後の待ち時間を設定
@@ -170,7 +171,7 @@ void Player::Step()
         }
     }
 	// スタミナ回復処理
-    if (!m_IsDashing)
+    if (!m_IsDash)
     {
         if (m_StaminaRecoveryDelay > 0.0f)
         {
@@ -183,7 +184,7 @@ void Player::Step()
         m_StaminaEmptyDelay--;
     }
 	// スタミナ回復処理
-    if (!m_IsDashing && m_StaminaRecoveryDelay <= 0.0f)
+    if (!m_IsDash && m_StaminaRecoveryDelay <= 0.0f)
     {
 		// スタミナが0になった後の待ち時間がある場合、回復量を減らす
         if (m_StaminaEmptyDelay > 0.0f)
@@ -223,6 +224,18 @@ void Player::Update()
 
 	// アニメーションの更新
 	UpdateAnimation();
+
+    // 所持している宝石の位置を更新
+    for (int i = 0; i < static_cast<int>(m_Gems.size()); i++)
+    {
+        if (m_Gems[i] != nullptr)
+        {
+			// 宝石の位置をプレイヤーの座標に基づいて設定(左手に持つ。1個目は左手の位置、2個目は1個目の少し左側、3個目は2個目の少し左側に配置、以降繰り返し)
+            VECTOR gemPos = VGet(m_Pos.x - 0.5f + i * 0.25f,m_Pos.y + 1.0f,m_Pos.z + 2.0f);
+			// 宝石の座標を更新
+            m_Gems[i]->SetPos(gemPos);
+        }
+    }
 }
 
 void Player::Draw()
@@ -237,8 +250,8 @@ void Player::Draw()
 	float staminaRate = m_Stamina / m_MaxStamina;                                           // スタミナの割合を計算
 	int currentWidth = (int)(barWidth * staminaRate);                                       // 現在のスタミナバーの幅を計算
 	DrawBox(barX, barY, barX + barWidth, barY + barHeight, GetColor(255, 255, 255), FALSE); // スタミナバーの枠を描画
-	int barColor;           // スタミナバーの色を設定
-    if (m_IsDashing)
+	int barColor;                                                                           // スタミナバーの色を設定
+    if (m_IsDash)
     {
 		barColor = GetColor(255, 0, 0);     // ダッシュ中は赤色
     }
@@ -247,11 +260,28 @@ void Player::Draw()
 		barColor = GetColor(255, 255, 0);   // 通常時は黄色
 	}
 	DrawBox(barX, barY, barX + currentWidth, barY + barHeight, barColor, TRUE); // スタミナバーの中身を描画
+
+    // 所持している宝石を描画
+    for (Gem* gem : m_Gems)
+    {
+        if (gem != nullptr)
+        {
+            gem->Draw();
+        }
+    }
 }
 
 void Player::Fin()
 {
     MV1DeleteModel(m_ModelHandle);
+
+    // 所持している宝石を解放
+    for (Gem* gem : m_Gems)
+    {
+        delete gem;
+    }
+
+    m_Gems.clear();
 }
 
 void Player::HitBlock(CollisionAABB* other)
@@ -312,4 +342,55 @@ void Player::UpdateAnimation()
 			m_AnimationNowTime = m_AnimationTotalTime;
         }
     }
+}
+
+// 宝石を所持する
+bool Player::AddGem(Gem* gem)
+{
+    if (gem == nullptr)
+    {
+        return false;
+    }
+
+    // 最大所持数を確認
+    if (m_Gems.size() >= MAX_GEM_COUNT)
+    {
+        return false;
+    }
+
+    m_Gems.push_back(gem);
+
+    return true;
+}
+
+// 宝石の所持数を取得
+int Player::GetGemCount() const
+{
+    return static_cast<int>(m_Gems.size());
+}
+
+// 所持している宝石の合計金額を取得
+int Player::GetGemTotalValue() const
+{
+    int totalValue = 0;
+
+    for (Gem* gem : m_Gems)
+    {
+        if (gem != nullptr)
+        {
+            totalValue += gem->GetValue();
+        }
+    }
+
+    return totalValue;
+}
+
+// 所持している宝石をすべて取り出す
+std::vector<Gem*> Player::TakeAllGems()
+{
+    std::vector<Gem*> gems = m_Gems;
+
+    m_Gems.clear();
+
+    return gems;
 }

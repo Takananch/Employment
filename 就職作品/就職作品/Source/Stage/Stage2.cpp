@@ -37,10 +37,10 @@ void Stage2::Init()
 void Stage2::Load()
 {
     // Stage2モデルをロード
-    m_Stage2Handle = MV1LoadModel("Data/Stage/Stage2.x");
+    m_Stage2Handle = MV1LoadModel("Data/Stage/Stage/Stage2/Stage2.x");
 
     // 当たり判定モデルをロード
-    LoadCollisionModel("Data/Stage/Stage2Collision.x");
+    LoadCollisionModel("Data/Stage/Stage/Stage2/Stage2Collision.x");
 }
 
 // 開始処理

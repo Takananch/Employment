@@ -1,16 +1,18 @@
 #include "DxLib.h"
 #include "Stone.h"
+#include "Gem.h"
 #include "../Input/Input.h"
+#include "../Player/Player.h"
 
 Stone::Stone()	// コンストラクタ
 {
 	m_StoneModelHandle = 0;				// 岩のモデルハンドルを初期化
-	m_GemModelHandle = 0;				// 宝石のモデルハンドルを初期化
 	m_Pos = VGet(0.0f, 0.0f, 0.0f);		// 岩と宝石の位置を初期化
 	m_IsBroken = false;					// 岩が破壊されているかどうかのフラグ
 	m_IsInteractable = false;			// 岩がインタラクト可能かどうかのフラグ
 	m_GemRandomSpawn = false;			// 宝石がランダムにスポーンするかどうかのフラグ
-	m_InteractDistance = 3.0f;			// 岩とプレイヤーのインタラクト可能距離を設定
+	m_InteractDistance = 3.5f;			// 岩とプレイヤーのインタラクト可能距離を設定
+	m_Gem = nullptr;					// 宝石のインスタンスを初期化
 }
 
 Stone::~Stone()	// デストラクタ
@@ -28,10 +30,7 @@ void Stone::Init()
 void Stone::Load()
 {
 	// 岩のモデルを読み込む
-	m_StoneModelHandle = MV1LoadModel("Data/Stage/Stage1Rock.x");
-
-	// 宝石のモデルを読み込む
-	m_GemModelHandle = MV1LoadModel("Data/Stage/Gem.x");
+	m_StoneModelHandle = MV1LoadModel("Data/Stage/Stone/Stone.x");
 }
 
 void Stone::Start()
@@ -41,20 +40,20 @@ void Stone::Start()
 	{
 		MV1SetPosition(m_StoneModelHandle, m_Pos);
 	}
-
-	if (m_GemModelHandle != -1)
-	{
-		MV1SetPosition(m_GemModelHandle, m_Pos);
-	}
 }
 
-void Stone::Step(VECTOR playerPos)
+void Stone::Step(Player* player)
 {
+	if (player == nullptr)
+	{
+		return;
+	}
+
 	// 岩が破壊されていない場合
 	if (!m_IsBroken)
 	{
 		// プレイヤーと岩の距離を計算
-		float distance = VSize(VSub(playerPos, m_Pos));
+		float distance = VSize(VSub(player->GetPos(), m_Pos));
 
 		// インタラクト可能距離以内か判定
 		if (distance <= m_InteractDistance)
@@ -71,6 +70,29 @@ void Stone::Step(VECTOR playerPos)
 				if (GetRand(1) == 0)
 				{
 					m_GemRandomSpawn = true;
+
+					// Gemを生成
+					m_Gem = new Gem();
+					m_Gem->SetPos(m_Pos);
+
+					// 宝石のモデルを読み込む
+					if (!m_Gem->Load())
+					{
+						delete m_Gem;
+						m_Gem = nullptr;
+					}
+				}
+
+				// 宝石が存在する場合、取得判定を行う
+				if (m_Gem != nullptr)
+				{
+					m_Gem->Step(player);
+
+					// 宝石が取得された場合、Stone側の管理から外す
+					if (m_Gem->IsPickedUp())
+					{
+						m_Gem = nullptr;
+					}
 				}
 			}
 		}
@@ -84,6 +106,18 @@ void Stone::Step(VECTOR playerPos)
 		// 岩が破壊された後はインタラクト不可
 		m_IsInteractable = false;
 	}
+
+	// 宝石が存在する場合、取得判定を行う
+	if (m_Gem != nullptr)
+	{
+		m_Gem->Step(player);
+
+		// Playerへの追加に成功していれば、所有権をPlayerに移す
+		if (m_Gem->IsInteractable() == false && player->GetGemCount() <= 3)
+		{
+			// 試している最中。まだ取得成功の判定を行わない
+		}
+	}
 }
 
 void Stone::Update()
@@ -91,11 +125,6 @@ void Stone::Update()
 	if (m_StoneModelHandle != -1)
 	{
 		MV1SetPosition(m_StoneModelHandle, m_Pos);
-	}
-
-	if (m_GemModelHandle != -1)
-	{
-		MV1SetPosition(m_GemModelHandle, m_Pos);
 	}
 }
 
@@ -110,12 +139,9 @@ void Stone::Draw()
 		}
 	}
 	// 岩が破壊されていて、GetRand(1)の結果が0(出現)の場合は宝石を表示
-	else if (m_GemRandomSpawn)
+	else if (m_Gem != nullptr)
 	{
-		if (m_GemModelHandle != -1)
-		{
-			MV1DrawModel(m_GemModelHandle);
-		}
+		m_Gem->Draw();
 	}
 }
 
@@ -126,9 +152,11 @@ void Stone::Fin()
 		MV1DeleteModel(m_StoneModelHandle);
 	}
 
-	if (m_GemModelHandle != -1)
+	// まだ岩側が管理している宝石だけ解放する
+	if (m_Gem != nullptr)
 	{
-		MV1DeleteModel(m_GemModelHandle);
+		delete m_Gem;
+		m_Gem = nullptr;
 	}
 }
 
@@ -139,7 +167,19 @@ void Stone::SetPos(VECTOR pos)
 
 bool Stone::IsInteractable() const
 {
-	return m_IsInteractable;	// プレイヤーが岩に近づいたかどうかの判定
+	// 岩がインタラクト可能な場合はtrueを返す
+	if (m_IsInteractable)
+	{
+		return true;
+	}
+
+	// 宝石が存在し、かつ宝石がインタラクト可能な場合はtrueを返す
+	if (m_Gem != nullptr && m_Gem->IsInteractable())
+	{
+		return true;
+	}
+
+	return false;
 }
 
 bool Stone::IsBroken() const

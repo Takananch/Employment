@@ -1,7 +1,8 @@
 #pragma once
 #include "SceneBase.h"
 
-class BackGround;
+//class BackGround;
+class Minecart;
 
 class PlayScene : public SceneBase
 {
@@ -21,4 +22,7 @@ public:
 private:
 	float m_SubLevel1Timer;	// サブレベル1のタイマー
 	float m_SubLevel1Alpha;	// サブレベル1のアルファ値
+
+	Minecart* m_Minecart;
+	Money* m_Money;     // 納品金額の管理
 };

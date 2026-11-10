@@ -129,6 +129,9 @@
     <ClCompile Include="Source\Stage\Minecart.cpp">
       <Filter>Source\Stage</Filter>
     </ClCompile>
+    <ClCompile Include="Source\StoneGem\Gem.cpp">
+      <Filter>Source\StoneGem</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Source\FPS\FPS.h">
@@ -220,6 +223,9 @@
     </ClInclude>
     <ClInclude Include="Source\Stage\Minecart.h">
       <Filter>Source\Stage</Filter>
+    </ClInclude>
+    <ClInclude Include="Source\StoneGem\Gem.h">
+      <Filter>Source\StoneGem</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

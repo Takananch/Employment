@@ -8,6 +8,8 @@
 #include "../Sound/Sound.h"
 #include "../Stage/StageManager.h"
 #include "../StoneGem/StoneManager.h"
+#include "../Stage/Minecart.h"
+#include "../Stage/Money.h"
 
 int g_CenterPixelHandle = 0;		// 画面中心の点画像のハンドル
 int g_UI_TargetAmountHandle = 0;	// 目標額を表示するUI画像のハンドル
@@ -19,6 +21,9 @@ PlayScene::PlayScene() : SceneBase()
 {
 	m_SubLevel1Timer = 0.0f;	// サブレベル1画像のタイマー
 	m_SubLevel1Alpha = 255.0f;	// サブレベル1画像のアルファ値
+
+	m_Minecart = nullptr;
+	m_Money = nullptr;
 }
 
 PlayScene::~PlayScene()
@@ -36,6 +41,11 @@ void PlayScene::Init()
 	m_SubLevel1Alpha = 255.0f;		// サブレベル1画像のアルファ値を初期化
 
 	CollisionManager::CreateInstance();
+
+	m_Minecart = new Minecart();
+	m_Minecart->Init();
+	m_Money = new Money();
+	m_Money->Init();
 
 	StoneManager::CreateInstance();
 	StoneManager::GetInstance()->Init();
@@ -64,6 +74,7 @@ void PlayScene::Load()
 	PlayerManager::GetInstance()->Load();
 	CameraManager::GetInstance()->Load();
 	StageManager::GetInstance()->Load();
+	m_Minecart->Load();
 }
 
 void PlayScene::Start()
@@ -71,16 +82,28 @@ void PlayScene::Start()
 	StageManager::GetInstance()->Start();
 	PlayerManager::GetInstance()->Start();
 	CameraManager::GetInstance()->Start();
+	m_Minecart->Start();
 }
 
 void PlayScene::Step()
 {
 	StageManager::GetInstance()->Step();
-
-
 	PlayerManager::GetInstance()->Step();
 	StoneManager::GetInstance()->Step();
 	CameraManager::GetInstance()->Step();
+	m_Minecart->Step();
+
+	// 納品エリアに入っているか確認
+	Player* player = PlayerManager::GetInstance()->GetPlayer();
+
+	if (m_Minecart->IsPlayerInDeliveryArea(player))
+	{
+		// 宝石を所持している場合、納品する
+		if (player->GetGemCount() > 0)
+		{
+			m_Money->Deposit(player);
+		}
+	}
 
 	// SubLevel1画像の表示時間を計測
 	if (m_SubLevel1Timer < 180.0f)
@@ -105,10 +128,12 @@ void PlayScene::Update()
 	PlayerManager::GetInstance()->Update();
 	StoneManager::GetInstance()->Update();
 	CameraManager::GetInstance()->Update();
+	m_Minecart->Update();
 }
 
 void PlayScene::Draw()
 {
+	m_Minecart->Draw();
 	StageManager::GetInstance()->Draw();
 	StoneManager::GetInstance()->Draw();
 	PlayerManager::GetInstance()->Draw();
@@ -119,8 +144,8 @@ void PlayScene::Draw()
 	DrawGraph(0, 0, g_UI_TargetAmountHandle, TRUE);
 	DrawGraph(0, 0, g_UI_OperationHandle, TRUE);
 
-	// 目標額の描画
-	DrawString(350, 55, "%d/283", GetColor(0, 0, 0));
+	// 累計金額と目標金額を描画
+	DrawFormatString(350, 55, GetColor(0, 0, 0),"%d/300", m_Money->GetTotalMoney());
 
 	// Eキー画像の描画
 	if (StoneManager::GetInstance()->IsInteractable())
@@ -139,6 +164,18 @@ void PlayScene::Draw()
 
 void PlayScene::Fin()
 {
+	if (m_Minecart != nullptr)
+	{
+		delete m_Minecart;
+		m_Minecart = nullptr;
+	}
+
+	if (m_Money != nullptr)
+	{
+		delete m_Money;
+		m_Money = nullptr;
+	}
+
 	StageManager::DeleteInstance();
 	PlayerManager::DeleteInstance();
 	StoneManager::DeleteInstance();

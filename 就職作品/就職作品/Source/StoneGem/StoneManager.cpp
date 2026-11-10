@@ -27,11 +27,11 @@ StoneManager* StoneManager::GetInstance()
     return m_Instance;
 }
 
-StoneManager::StoneManager()
+StoneManager::StoneManager()  // コンストラクタ
 {
 }
 
-StoneManager::~StoneManager()
+StoneManager::~StoneManager() // デストラクタ
 {
     Fin();
 }
@@ -66,7 +66,7 @@ void StoneManager::Start()
     }
 }
 
-// 更新前処理
+// ステップ処理
 void StoneManager::Step()
 {
     if (PlayerManager::GetInstance() == nullptr)
@@ -81,13 +81,11 @@ void StoneManager::Step()
         return;
     }
 
-    VECTOR playerPos = player->GetPos();
-
     for (Stone* stone : m_Stones)
     {
         if (stone != nullptr)
         {
-            stone->Step(playerPos);
+            stone->Step(player);
         }
     }
 }
@@ -149,7 +147,7 @@ Stone* StoneManager::CreateStone(VECTOR pos)
     return stone;
 }
 
-// インタラクト可能な岩があるか取得
+// 岩がインタラクト可能かどうかを判定
 bool StoneManager::IsInteractable() const
 {
     for (Stone* stone : m_Stones)

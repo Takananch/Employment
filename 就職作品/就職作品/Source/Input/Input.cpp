@@ -38,7 +38,7 @@ namespace Input
 		g_InputState = 0;
 
 		// 前回の入力を覚えておく
-		g_PrevInputState = g_InputState;
+		// g_PrevInputState = g_InputState;
 
 		// 入力状態をクリア
 		g_InputState = 0;

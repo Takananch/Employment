@@ -51,10 +51,10 @@ void Stage1::Init()
 void Stage1::Load()
 {
     // Stage1モデルをロード
-    m_Stage1Handle = MV1LoadModel("Data/Stage/Stage1.x");
+    m_Stage1Handle = MV1LoadModel("Data/Stage/Stage/Stage1/Stage1.x");
 
     // 当たり判定モデルをロード
-    LoadCollisionModel("Data/Stage/Stage1Collision.x");
+    LoadCollisionModel("Data/Stage/Stage/Stage1/Stage1Collision.x");
 }
 
 // 開始処理

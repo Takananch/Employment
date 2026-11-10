@@ -1,6 +1,9 @@
 #pragma once
 #include "DxLib.h"
 
+class Gem;
+class Player;
+
 class Stone
 {
 public:
@@ -10,7 +13,7 @@ public:
 	void Init();
 	void Load();
 	void Start();
-	void Step(VECTOR playerPos);
+	void Step(Player* player);
 	void Update();
 	void Draw();
 	void Fin();
@@ -22,7 +25,6 @@ public:
 
 private:
 	int m_StoneModelHandle;		// 岩のモデルハンドル
-	int m_GemModelHandle;		// 宝石のモデルハンドル
 
 	VECTOR m_Pos;				// 岩と宝石の位置
 
@@ -31,4 +33,6 @@ private:
 	bool m_GemRandomSpawn;		// 宝石がランダムにスポーンするかどうか
 
 	float m_InteractDistance;	// 岩とプレイヤーのインタラクト可能距離
+
+	Gem* m_Gem;					// 宝石のインスタンス
 };

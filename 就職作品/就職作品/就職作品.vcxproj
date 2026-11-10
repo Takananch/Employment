@@ -161,6 +161,7 @@
     <ClCompile Include="Source\Stage\Stage2.cpp" />
     <ClCompile Include="Source\Stage\StageBase.cpp" />
     <ClCompile Include="Source\Stage\StageManager.cpp" />
+    <ClCompile Include="Source\StoneGem\Gem.cpp" />
     <ClCompile Include="Source\StoneGem\Stone.cpp" />
     <ClCompile Include="Source\StoneGem\StoneManager.cpp" />
     <ClCompile Include="Source\TimeLimit\TimeLimit.cpp" />
@@ -193,6 +194,7 @@
     <ClInclude Include="Source\Stage\Stage2.h" />
     <ClInclude Include="Source\Stage\StageBase.h" />
     <ClInclude Include="Source\Stage\StageManager.h" />
+    <ClInclude Include="Source\StoneGem\Gem.h" />
     <ClInclude Include="Source\StoneGem\Stone.h" />
     <ClInclude Include="Source\StoneGem\StoneManager.h" />
     <ClInclude Include="Source\TimeLimit\TimeLimit.h" />
