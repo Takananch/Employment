@@ -25,14 +25,12 @@ public:
 
 private:
 	int m_StoneModelHandle;		// 岩のモデルハンドル
-
 	VECTOR m_Pos;				// 岩と宝石の位置
-
 	bool m_IsBroken;			// 岩が破壊されているかどうか
 	bool m_IsInteractable;		// 岩がインタラクト可能かどうか
-	bool m_GemRandomSpawn;		// 宝石がランダムにスポーンするかどうか
-
 	float m_InteractDistance;	// 岩とプレイヤーのインタラクト可能距離
+	int m_GemSpawnTime;         // 宝石のスポーン開始時刻
+	bool m_IsGemSpawnPending;   // 宝石のスポーン待機中かどうか
 
 	Gem* m_Gem;					// 宝石のインスタンス
 };

@@ -10,8 +10,9 @@ Stone::Stone()	// コンストラクタ
 	m_Pos = VGet(0.0f, 0.0f, 0.0f);		// 岩と宝石の位置を初期化
 	m_IsBroken = false;					// 岩が破壊されているかどうかのフラグ
 	m_IsInteractable = false;			// 岩がインタラクト可能かどうかのフラグ
-	m_GemRandomSpawn = false;			// 宝石がランダムにスポーンするかどうかのフラグ
 	m_InteractDistance = 3.5f;			// 岩とプレイヤーのインタラクト可能距離を設定
+	m_GemSpawnTime = 0;					// 宝石のスポーン開始時刻を初期化
+	m_IsGemSpawnPending = false;		// 宝石のスポーン待機中かどうかのフラグを初期化
 	m_Gem = nullptr;					// 宝石のインスタンスを初期化
 }
 
@@ -24,7 +25,8 @@ void Stone::Init()
 {
 	m_IsBroken = false;
 	m_IsInteractable = false;
-	m_GemRandomSpawn = false;
+	m_GemSpawnTime = 0;
+	m_IsGemSpawnPending = false;
 }
 
 void Stone::Load()
@@ -66,33 +68,11 @@ void Stone::Step(Player* player)
 				m_IsBroken = true;
 				m_IsInteractable = false;
 
-				// 岩が破壊されたとき、50%の確率で宝石をスポーンさせる(0でスポーン、1でスポーンしない)
+				// 岩が破壊されたとき、50%の確率で宝石をスポーンさせる(0で宝石が出現、1で宝石が出現しない)
 				if (GetRand(1) == 0)
 				{
-					m_GemRandomSpawn = true;
-
-					// Gemを生成
-					m_Gem = new Gem();
-					m_Gem->SetPos(m_Pos);
-
-					// 宝石のモデルを読み込む
-					if (!m_Gem->Load())
-					{
-						delete m_Gem;
-						m_Gem = nullptr;
-					}
-				}
-
-				// 宝石が存在する場合、取得判定を行う
-				if (m_Gem != nullptr)
-				{
-					m_Gem->Step(player);
-
-					// 宝石が取得された場合、Stone側の管理から外す
-					if (m_Gem->IsPickedUp())
-					{
-						m_Gem = nullptr;
-					}
+					m_IsGemSpawnPending = true;
+					m_GemSpawnTime = GetNowCount();
 				}
 			}
 		}
@@ -107,15 +87,35 @@ void Stone::Step(Player* player)
 		m_IsInteractable = false;
 	}
 
+	// 岩が破壊されてから0.25秒経過したか判定
+	if (m_IsGemSpawnPending)
+	{
+		// 宝石のスポーン待機中で、0.25秒経過した場合、宝石を生成する
+		if (GetNowCount() - m_GemSpawnTime >= 250)
+		{
+			m_Gem = new Gem();
+			m_Gem->SetPos(m_Pos);
+
+			// 宝石のモデルを読み込む
+			if (!m_Gem->Load())
+			{
+				delete m_Gem;
+				m_Gem = nullptr;
+			}
+
+			m_IsGemSpawnPending = false;
+		}
+	}
+
 	// 宝石が存在する場合、取得判定を行う
 	if (m_Gem != nullptr)
 	{
 		m_Gem->Step(player);
 
-		// Playerへの追加に成功していれば、所有権をPlayerに移す
-		if (m_Gem->IsInteractable() == false && player->GetGemCount() <= 3)
+		// 宝石が取得された場合、Stone側の管理から外す
+		if (m_Gem->IsPickedUp())
 		{
-			// 試している最中。まだ取得成功の判定を行わない
+			m_Gem = nullptr;
 		}
 	}
 }
@@ -138,7 +138,7 @@ void Stone::Draw()
 			MV1DrawModel(m_StoneModelHandle);
 		}
 	}
-	// 岩が破壊されていて、GetRand(1)の結果が0(出現)の場合は宝石を表示
+	// 岩が破壊されていて、GetRand(1)の結果が0(出現)の場合は宝石を表示、1の場合は宝石を表示しない
 	else if (m_Gem != nullptr)
 	{
 		m_Gem->Draw();

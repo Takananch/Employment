@@ -13,7 +13,7 @@ Gem::Gem()
 	m_IsVisible = true;             // 宝石が表示されるかどうかのフラグを初期化
 	m_IsInteractable = false;       // 宝石がインタラクト可能かどうかのフラグを初期化
 	m_IsPickUp = false;           // 宝石が取得されたかどうかのフラグを初期化
-	m_InteractDistance = 2.0f;      // プレイヤーと宝石のインタラクト可能距離を設定
+	m_InteractDistance = 3.5f;      // プレイヤーと宝石のインタラクト可能距離を設定
 }
 
 Gem::~Gem()

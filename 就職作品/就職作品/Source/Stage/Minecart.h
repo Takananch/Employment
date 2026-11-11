@@ -28,12 +28,10 @@ public:
     bool IsPlayerInDeliveryArea(Player* player) const;
 
 private:
-    int m_ModelHandle;              // トロッコ本体のモデルハンドル
-    int m_CollisionModelHandle;     // 当たり判定モデルのハンドル
+    int m_ModelHandle;                       // トロッコ本体のモデルハンドル
+    int m_CollisionModelHandle;              // 当たり判定モデルのハンドル
     int m_DeliveryCollisionModelHandle;      // 納品エリアのモデルハンドル
-
-    VECTOR m_Pos;                   // トロッコの座標
-
-    CollisionAABB* m_AABB;          // トロッコのAABB
-    CollisionAABB* m_DeliveryAABB;  // 納品エリアのAABB
+    VECTOR m_Pos;                            // トロッコの座標
+    CollisionAABB* m_AABB;                   // トロッコのAABB
+    CollisionAABB* m_DeliveryCollisionAABB;           // 納品エリアのAABB
 };
